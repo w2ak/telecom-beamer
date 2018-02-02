@@ -1,0 +1,515 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamertpt}[2018/02/02 v1.0.0-beta, slideshows layout for Télécom ParisTech/École polytechnique/Université ParisSaclay]
+
+%=======================================================================
+% Declaration des options
+%=======================================================================
+\DeclareOption{simplefoot}{%
+  \AtEndOfPackage{%
+    \renewcommand{\beamertptshorttitle}{}%
+  }
+}
+\DeclareOption{simplehead}{%
+  \AtEndOfPackage{%
+    \renewcommand{\includebeamertptfili}{}%
+  }
+}
+\DeclareOption{notochead}{%
+  \AtEndOfPackage{%
+    \renewcommand{\includebeamertptsection}{}%
+  }
+}
+\DeclareOption{simplebloc}{%
+  \AtEndOfPackage{%
+    \renewcommand{\beamertptblockheader}{}
+  }
+}
+\DeclareOption{oldscreen}{%
+  \AtEndOfPackage{%
+    \oldscreen{}\applyscreen{}%
+  }
+}
+\ProcessOptions*
+%=======================================================================
+% Package requis
+%=======================================================================
+\RequirePackage{calc}
+\RequirePackage{ifthen} % pour utiliser des booleens
+\RequirePackage{graphicx}
+\RequirePackage{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{xargs}
+\RequirePackage{adjustbox}
+\RequirePackage{pgf}
+\RequirePackage{ifluatex,ifxetex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\else % xelatex or lualatex
+  \RequirePackage{fontspec}
+  \AtBeginDocument{
+    \setsansfont{Cholla}[
+      Extension=.otf,
+      UprightFont=*-Regular,
+      ItalicFont=*-Italic,
+      BoldFont=*-Bold
+    ]
+    \setromanfont{Cholla}[
+      Extension=.otf,
+      UprightFont=*-Regular,
+      ItalicFont=*-Italic,
+      BoldFont=*-Bold
+    ]
+  }
+\fi
+%=======================================================================
+% Definition des longueurs
+%=======================================================================
+\newcounter{tmpX}\newcounter{tmpY}
+\newcounter{bmrX}\newcounter{bmrY}
+
+\newcounter{bmrW}\newcounter{bmrH}
+\setcounter{bmrW}{320}
+
+\newcounter{bmrXmargin}
+\setcounter{bmrXmargin}{12}
+\newlength\beamertptmargin%
+\setlength\beamertptmargin{\thebmrXmargin\paperwidth/\thebmrW} % 6 units
+
+\newcounter{bmrTPmargin}
+\setcounter{bmrTPmargin}{6}
+
+\newcommand\oldscreen{% 4:3 ratio
+  \setcounter{bmrH}{240}
+}
+\newcommand\newscreen{% 16:9 ratio
+  \setcounter{bmrH}{180}
+}
+\newcommand\applyscreen{%
+}
+\newscreen{}\applyscreen{}
+%=======================================================================
+% Definition des couleurs
+%=======================================================================
+\definecolor{marron}{RGB}{109,80,71}
+\colorlet{noir}{black}
+\definecolor{rouge}{RGB}{191,18,56}
+\colorlet{gris}{black!40!white}
+
+\definecolor{themeviolet-bg}{RGB}{153,140,157}
+\definecolor{themeviolet-altbg}{RGB}{106,90,110}
+\colorlet{themeviolet-fg}{noir}
+
+\definecolor{themegrey-bg}{RGB}{160,142,147}
+\definecolor{themegrey-altbg}{RGB}{122,113,108}
+\colorlet{themegrey-fg}{noir}
+
+\definecolor{themered-bg}{RGB}{213,90,79}
+\definecolor{themered-altbg}{RGB}{135,70,55}
+\definecolor{themered-fg}{RGB}{0,80,111}
+
+\definecolor{themeblue-bg}{RGB}{0,123,147}
+\definecolor{themeblue-altbg}{RGB}{0,80,102}
+\definecolor{themeblue-fg}{RGB}{245,211,71}
+
+\definecolor{themepurple-bg}{RGB}{97,37,103}
+\definecolor{themepurple-altbg}{RGB}{42,23,40}
+\definecolor{themepurple-fg}{RGB}{245,211,71}
+
+\definecolor{themegreen-bg}{RGB}{126,143,100}
+\definecolor{themegreen-altbg}{RGB}{75,97,65}
+\definecolor{themegreen-fg}{RGB}{242,204,56}
+
+\definecolor{themeyellow-bg}{RGB}{219,187,46}
+\definecolor{themeyellow-altbg}{RGB}{151,125,0}
+\colorlet{themeyellow-fg}{noir}
+
+\definecolor{themeturquoise-bg}{RGB}{125,212,199}
+\definecolor{themeturquoise-altbg}{RGB}{82,170,154}
+\colorlet{themeturquoise-fg}{noir}
+
+%\definecolor{theme-bg}{RGB}{}
+%\definecolor{theme-altbg}{RGB}{}
+%\definecolor{theme-fg}{RGB}{}
+
+%=======================================================================
+% Definition du theme beamer
+%=======================================================================
+%---------- Parametres generaux
+\newcommand\defaultheadcolor{%
+  \colorlet{tpthdcolor}{noir}%
+}
+\defaultheadcolor%
+\newcommand\resetcolors{%
+  \colorlet{tptfgcolor}{black}%
+  \colorlet{tptbgcolor}{white}%
+  \colorlet{tpttextcolor}{black}%
+  \colorlet{tptemphcolor}{noir}%
+  \colorlet{tptalrtcolor}{rouge}%
+  \colorlet{tptfootcolor}{tpttextcolor}%
+  \colorlet{tptheadcolor}{tptemphcolor}%
+}
+\resetcolors%
+
+\setbeamercovered{transparent=40}
+\setlength\fboxsep{1ex}
+
+\usefonttheme{professionalfonts}
+\usefonttheme[stillsansseriflarge,stillsansserifsmall]{serif}
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamersize{text margin left=\beamertptmargin}
+\setbeamersize{text margin right=\beamertptmargin}
+
+\newcommand{\beamertptshorttitle}{-- \insertshorttitle}
+\newcommand{\beamertptcompany}{}
+\newcommand{\company}[1]{%
+  \renewcommand{\beamertptcompany}{-- \textbf{#1} }%
+}
+\newcommand{\beamertptfootleft}{\textbf{TÉLÉCOM PARISTECH -- ÉCOLE POLYTECHNIQUE} \beamertptcompany}
+\newcommand\resetfootline{%
+  \setbeamertemplate{footline}{%
+    \color{tptfootcolor}%
+    \hspace*{\beamertptmargin}%
+    \raisebox{\beamertptmargin}{%
+      \beamertptfootleft%
+      \beamertptshorttitle%
+    }%
+    \hspace*{\fill}
+    \raisebox{\beamertptmargin}{%
+      \insertframenumber%
+    }%
+    \hspace*{\beamertptmargin}%
+  }
+}
+
+\newcommand\resetframetitle{%
+  \setbeamertemplate{frametitle}{%
+    \raisebox{-\beamertptmargin}{\sffamily\LARGE\color{tptheadcolor}\MakeUppercase{\insertframetitle}}
+  }
+}
+
+\newcommand\includebeamertptfili{%
+  \pgfsetfillopacity{0.1}%
+  \includegraphics[height=\paperheight/7,keepaspectratio]{tptfiligrane}%
+  \pgfsetfillopacity{1.}%
+}
+\newcommand\insertsectionHEAD{\expandafter\insertsectionHEADaux\insertsectionhead}
+\newcommand\insertsectionHEADaux[3]{#1{#2}{\MakeUppercase{#3}}}
+\newcommand\includebeamertptsection{%
+  \ifnum \thesection>0
+    {%
+        \begin{minipage}{\textwidth}\small\flushright%
+          \hspace*{0mm}\insertsectionHEAD%
+        \end{minipage}%
+    }%
+  \else%
+  \fi%
+}
+\newcommand\resetbackgroundcanvas{%
+  \setbeamertemplate{background canvas}{%
+    \setlength{\unitlength}{\paperwidth/\thebmrW}%
+    \begin{picture}(\thebmrW,\thebmrH)%
+      \setcounter{bmrX}{\thebmrW-\thebmrXmargin}\setcounter{bmrY}{\thebmrH-\thebmrXmargin}%
+      \put(\thebmrX,\thebmrY){%
+        \makebox(0,0)[rt]{%
+          \begin{minipage}{\paperheight/5}\flushright%
+            \includebeamertptfili{}
+          \end{minipage}
+        }%
+      }%
+      \setcounter{bmrY}{\thebmrY-5}
+      \put(\thebmrX,\thebmrY){%
+        \makebox(0,0)[rt]{%
+          \begin{minipage}{1.5\paperheight/5}\flushright%
+            \includebeamertptsection{}
+          \end{minipage}
+        }%
+      }%
+    \end{picture}%
+  }%
+}%
+
+\newcommand{\beamertptblockheader}{%
+  \raisebox{-0.5ex}{%
+    \color{rouge}\rule{.7em}{.3ex}%
+    \color{noir}\rule{.7em}{.3ex}%
+    \color{marron}\rule{.7em}{.3ex}%
+  }\\
+}
+\newcommand\resetblock{%
+  \setbeamertemplate{block begin}{%
+    \begin{minipage}{\textwidth}\flushleft%
+      \beamertptblockheader%
+      \color{rouge}\rmfamily\bfseries\large%
+      \insertblocktitle{}
+
+      \color{tptemphcolor}\sffamily\mdseries\normalsize%
+  }
+  \setbeamertemplate{block end}{%
+    \end{minipage}\vspace*{1mm}
+  }
+}
+
+\newcommand\beamertptresettemplates{%
+  \resetcolors%
+  \resetfootline%
+  \resetframetitle%
+  \resetbackgroundcanvas%
+  \resetblock%
+}
+\AtBeginDocument{\beamertptresettemplates{}}
+
+\setbeamercolor{alerted text}{fg=tptalrtcolor}
+\setbeamercolor{item}{fg=tptemphcolor}
+\setbeamercolor{normal text}{fg=tpttextcolor}
+\setbeamertemplate{itemize items}{-}
+
+%=======================================================================
+% Commandes de mise en page utilisateur
+%=======================================================================
+%---------- Informations sur le document
+\def\tpttitresave{}
+\def\tptsoustitresave{}
+\def\tptauteursave{}
+\def\tptdatesave{\today}
+
+%---------- Mise en page
+\newcommand{\MakeUppercaseWithNewline}[1]{%
+  \begingroup
+  \let\SavedOrgNewline\\%
+  \DeclareRobustCommand{\\}{\SavedOrgNewline}%
+  \MakeUppercase{#1}%
+  \endgroup
+}
+
+\let\oldtitle=\title%
+\renewcommandx\title[3][1={},3={}]{%
+    % use: \title[sous-titre]{titre}[titre court]
+    \renewcommand\tpttitresave{#2}
+    \renewcommand\tptsoustitresave{#1}
+    \ifthenelse{\equal{#3}{}}{%
+      \oldtitle{#2}%
+    }{%
+      \oldtitle[#3]{#2}%
+    }
+    \subtitle{#1}
+}
+
+\let\oldauthor=\author%
+\renewcommandx\author[1]{%
+    % use: \author[auteur court]{auteur}
+    \renewcommand\tptauteursave{#1}
+    \oldauthor{#1}
+}
+
+% \let\olddate=\date
+\renewcommand\date[1]{%
+    \renewcommand\tptdatesave{#1}
+}
+
+%=======================================================================
+% Diapos conforme charte graphique
+%=======================================================================
+%--- Maketitle
+\newcommand{\includeoriginallogo}[2][0.23]{%
+  \includegraphics[height=#1\paperheight,width=\textwidth,keepaspectratio]{#2logo}%
+}
+\newcommand{\includeoriginallogostack}[1][0.23]{%
+  \includeoriginallogo[#1]{tpt}\vspace*{\fill}
+  \includeoriginallogo[#1]{x}%
+}
+\def\includebeamertptlogo{}
+\newcommand{\nologo}[1]{%
+  \renewcommand{\includebeamertptlogo}{%
+    \begin{minipage}[t][.7\paperheight][t]{.25\paperwidth}\center%
+      \includeoriginallogostack[.33]{}
+    \end{minipage}
+  }
+}
+\newlength\logoheight
+\setlength\logoheight{.25\paperheight}
+\nologo{}
+\def\logo{}
+\renewcommand{\logo}[2][1]{%
+  \renewcommand{\includebeamertptlogo}{%
+    \begin{minipage}[t][.7\paperheight][t]{.25\paperwidth}\center%
+      \includeoriginallogostack{}\vspace*{\fill}
+      %\setlength\logoheight{#1\logoheight}%
+      \includegraphics[height=#1\logoheight,width=\paperwidth,keepaspectratio]{#2}
+      %\setlength\logoheight{.25\paperheight}
+    \end{minipage}
+  }
+}
+\AtBeginDocument{%
+  \renewcommand\maketitle{%
+    \setlength{\unitlength}{\paperwidth/\thebmrW}%
+    \setbeamertemplate{background canvas}{%
+      \color{noir}%
+      \begin{picture}(\thebmrW,\thebmrH)%
+        \setcounter{bmrX}{\thebmrW/2}\setcounter{bmrY}{\thebmrH/2}%
+        %\setlength\fboxsep{0pt}
+        \setcounter{bmrX}{3*\thebmrTPmargin}%
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[l]{%
+            %\fbox{%
+              \includebeamertptlogo{}%
+            %}%
+          }%
+        }%
+        \setcounter{bmrX}{(2*(\thebmrW/5))-\thebmrTPmargin}%
+        \setcounter{tmpX}{\thebmrW-\thebmrX-\thebmrTPmargin}%
+        \setcounter{bmrY}{\thebmrY+1}%
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[lb]{%
+            %\fbox{%
+              \begin{minipage}{\thetmpX\unitlength}\noindent\flushleft%
+                \Huge\setlength{\baselineskip}{0.7\baselineskip}%
+                \sffamily\bfseries\MakeUppercaseWithNewline{\tpttitresave}\hspace*{0pt}%
+              \end{minipage}%
+            %}%
+          }%
+        }%
+        \setcounter{bmrY}{\thebmrY-2}%
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[lt]{%
+            %\fbox{%
+              \begin{minipage}{\thetmpX\unitlength}\noindent\flushleft%
+                \color{gris}\Large\setlength{\baselineskip}{0.7\baselineskip}%
+                \sffamily\tptsoustitresave\hspace*{0pt}%
+              \end{minipage}%
+            %}%
+          }%
+        }%
+        \put(\thebmrX,\thebmrTPmargin){%
+          \makebox(0,0)[lb]{%
+            %\fbox{%
+              \begin{minipage}{.3\paperwidth}\noindent\flushleft%
+                \sffamily\normalsize\tptauteursave\hspace*{0pt}%
+              \end{minipage}%
+            %}%
+          }%
+        }%
+        \setcounter{bmrY}{(\thebmrH-2\thebmrTPmargin)/4 + \thebmrTPmargin}%
+        \setcounter{tmpX}{(\thebmrW-\thebmrX)/3}
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[l]{%
+            \color{rouge}\rule{\thetmpX\unitlength}{1.5ex}%
+          }%
+        }%
+        \setcounter{bmrX}{\thebmrX+\thetmpX}
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[l]{%
+            \color{noir}\rule{\thetmpX\unitlength}{1.5ex}%
+          }%
+        }%
+        \setcounter{bmrX}{\thebmrX+\thetmpX}
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[l]{%
+            \color{marron}\rule{\thetmpX\unitlength}{1.5ex}%
+          }%
+        }%
+        \setcounter{bmrX}{\thebmrW-\thebmrTPmargin}%
+        \put(\thebmrX,\thebmrTPmargin){%
+          \makebox(0,0)[rb]{%
+            %\fbox{%
+              \begin{minipage}{.3\paperwidth}\noindent\flushright%
+                \sffamily\normalsize\tptdatesave\hspace*{0pt}%
+              \end{minipage}%
+            %}%
+          }%
+        }%
+      \end{picture}%
+    }
+    \begin{frame}[plain,c]
+    \end{frame}
+    \resetbackgroundcanvas{}
+  }
+}
+
+%--- tptsection
+% Prototype :
+% \tptsection
+%          [short_title]
+%          {title}
+\def\tptsection{\@ifstar\@@tptsection\@tptsection}
+\newcommandx{\@tptsection}[2][{1={}}]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \section{#2}%
+  }{%
+    \section[#1]{#2}%
+  }%
+  \tptsectionframe{\arabic{section}}{#2}%
+}
+\newcommandx{\@@tptsection}[2][{1={}}]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \section*{#2}%
+  }{%
+    \section*[#1]{#2}%
+  }%
+  \addtocounter{section}{-1}
+  \tptsectionframe{}{#2}%
+}
+
+%- tptsectionframe
+% Prototype :
+% \tptsectionframe
+%               {number}
+%               {title}
+\newcommand{\tptsectionframe}[2]{%
+  \setbeamertemplate{background canvas}{%
+    \setlength{\fboxsep}{0pt}%
+    \setlength{\unitlength}{\paperwidth/\thebmrW}%
+    \begin{picture}(\thebmrW,\thebmrH)%
+      \setcounter{bmrX}{\thebmrW/2}%
+      \put(\thebmrX,0){%
+        \makebox(0,0)[cb]{%
+          \pgfsetfillopacity{0.05}%
+          \includegraphics[height=\paperheight,keepaspectratio]{tptfiligrane}%
+          \pgfsetfillopacity{1.}%
+        }%
+      }%
+      \setcounter{bmrY}{\thebmrH/2}%
+      \ifthenelse{\equal{#1}{}}{%
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[c]{%
+            %\fbox{%
+              \scalebox{1.7}{%
+                \begin{minipage}{120\unitlength}\centering%
+                  \Large\sffamily\color{noir}\MakeUppercaseWithNewline{#2}%
+                \end{minipage}%
+              }%
+            %}%
+          }%
+        }%
+      }{%
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[ct]{%
+            %\fbox{%
+              \scalebox{1.7}{%
+                \begin{minipage}{120\unitlength}\centering%
+                  \Large\sffamily\color{noir}\MakeUppercaseWithNewline{#2}%
+                \end{minipage}%
+              }%
+            %}%
+          }%
+        }%
+        \setcounter{bmrY}{\thebmrY+5}%
+        \put(\thebmrX,\thebmrY){%
+          \makebox(0,0)[cb]{%
+            %\fbox{%
+              \scalebox{1.7}{%
+                \begin{minipage}{120\unitlength}\centering%
+                  \Huge\sffamily\color{rouge}#1%
+                \end{minipage}%
+              }%
+            %}%
+          }%
+        }%
+      }%
+    \end{picture}%
+  }
+  \begin{frame}[plain,c]
+  \end{frame}
+  \resetbackgroundcanvas{}
+}
+
+\endinput

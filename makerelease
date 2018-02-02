@@ -1,0 +1,49 @@
+#!/bin/bash
+if [ $# -eq 0 ]; then
+  echo >&2 "makerelease: creates release archives"
+  echo >&2 "Usage: $0 {destination folder to be emptied}"
+  exit 1;
+fi
+
+getversion () {
+  git describe --tags --match "v*" --long --dirty --abbrev=8 2>/dev/null
+}
+
+getreponame () {
+  git remote -v | grep origin | head -n1 | sed 's/\.git\s.*$//; s%^.*/%%'
+}
+
+folder=$1; shift;
+folder=${folder%/};
+signingkey=$(git config user.signingkey);
+if [ -n "${signingkey}" ]; then
+  keyargs=("-u" "${signingkey}");
+else
+  keyargs=();
+fi
+
+mkdir -p $folder
+find $folder -type f -delete
+arch="$(getreponame)-$(getversion)";
+tgz="$arch.tar.gz";
+zip="$arch.zip";
+
+make cleandist &&
+make &&
+{
+  find . -type f -name '*.tex'\
+             -or -name '*.pdf'\
+             -or -name '*.sty'\
+             -or -name '*.jpg'\
+             -or -name '*.md'\
+             -or -name 'LICENSE*'
+  find ./install/
+  find ./fonts/
+} | tee >(xargs -d'\n' tar czf "$folder/$tgz") >(xargs -d'\n' zip -q "$folder/$zip") | cat - && {
+  cd $folder &&
+  #gpg2 --armor --output "$zip.sig" --detach-sign "$zip" &&
+  #gpg2 --armor --output "$tgz.sig" --detach-sign "$tgz" &&
+  #md5sum "$tgz" "$zip" > "md5sums" &&
+  sha256sum "$tgz" "$zip" > "sha256sums" &&
+  gpg2 "${keyargs[@]}" --armor --output "sha256sums.sig" --detach-sign "sha256sums";
+}

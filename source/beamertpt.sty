@@ -93,6 +93,8 @@
 \colorlet{noir}{black}
 \definecolor{rouge}{RGB}{191,18,56}
 \colorlet{gris}{black!40!white}
+\definecolor{bleu}{RGB}{39,65,152}
+\definecolor{vert}{RGB}{11,148,68}
 
 \definecolor{themeviolet-bg}{RGB}{153,140,157}
 \definecolor{themeviolet-altbg}{RGB}{106,90,110}
@@ -212,7 +214,7 @@
       \put(\thebmrX,\thebmrY){%
         \makebox(0,0)[rt]{%
           \begin{minipage}{\paperheight/5}\flushright%
-            \includebeamertptfili{}
+            \hspace*{0mm}\includebeamertptfili{}
           \end{minipage}
         }%
       }%
@@ -220,7 +222,7 @@
       \put(\thebmrX,\thebmrY){%
         \makebox(0,0)[rt]{%
           \begin{minipage}{1.5\paperheight/5}\flushright%
-            \includebeamertptsection{}
+            \hspace*{0pt}\includebeamertptsection{}
           \end{minipage}
         }%
       }%
@@ -445,7 +447,7 @@
   }{%
     \section*[#1]{#2}%
   }%
-  \addtocounter{section}{-1}
+  \addtocounter{section}{-1}%
   \tptsectionframe{}{#2}%
 }
 
@@ -506,8 +508,8 @@
         }%
       }%
     \end{picture}%
-  }
-  \begin{frame}[plain,c]
+  }%
+  \begin{frame}[plain,c]%
   \end{frame}
   \resetbackgroundcanvas{}
 }

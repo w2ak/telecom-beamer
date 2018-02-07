@@ -21,7 +21,7 @@
 }
 \DeclareOption{nosubframe}{%
   \AtEndOfPackage{%
-    \renewcommand{\formatsubframenumber}[1]{\hspace*{0mm}}%
+    \renewcommand{\formatsubframenumber}[1]{\hspace*{0pt}}%
   }
 }
 \DeclareOption{simplebloc}{%
@@ -171,7 +171,9 @@
 \newcommand{\company}[1]{%
   \renewcommand{\beamertptcompany}{-- \textbf{#1} }%
 }
+\newcommand{\formatframenumber}[1]{#1}
 \newcommand{\formatsubframenumber}[1]{.#1}
+\newcommand{\backupslides}{\renewcommand\formatframenumber[1]{}}
 \xdef\insertsubframenumber{}
 \newcommand{\beamertptfootleft}{\textbf{TÉLÉCOM PARISTECH -- ÉCOLE POLYTECHNIQUE} \beamertptcompany}
 \newcommand\resetfootline{%
@@ -184,7 +186,7 @@
     }%
     \hspace*{\fill}
     \raisebox{\beamertptmargin}{%
-      \insertframenumber\formatsubframenumber{\insertsubframenumber}%
+      \hspace*{0pt}\formatframenumber{\insertframenumber\formatsubframenumber{\insertsubframenumber}}%
     }%
     \hspace*{\beamertptmargin}%
   }
@@ -208,7 +210,7 @@
   \ifnum \thesection>0
     {%
         \begin{minipage}{\textwidth}\small\flushright%
-          \hspace*{0mm}\insertsectionHEAD%
+          \hspace*{0pt}\insertsectionHEAD%
         \end{minipage}%
     }%
   \else%
@@ -222,7 +224,7 @@
       \put(\thebmrX,\thebmrY){%
         \makebox(0,0)[rt]{%
           \begin{minipage}{\paperheight/5}\flushright%
-            \hspace*{0mm}\includebeamertptfili{}
+            \hspace*{0pt}\includebeamertptfili{}
           \end{minipage}
         }%
       }%

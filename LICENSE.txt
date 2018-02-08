@@ -1,4 +1,4 @@
-Copyright (C) 2015 i by Clement Durand
+Copyright (C) 2018 i by Clement Durand
 
 This file may be distributed and/or modified under the
 conditions of the LaTeX Project Public License, either

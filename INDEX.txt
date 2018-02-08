@@ -1,0 +1,18 @@
+source/beamertpt.sty              tex/latex/beamertpt
+source/tptfiligrane.pdf           tex/latex/beamertpt
+source/tptlogo.pdf                tex/latex/beamertpt
+source/xlogo.pdf                  tex/latex/beamertpt
+fonts/Cholla/Cholla-Bold.otf      fonts/opentype/Cholla
+fonts/Cholla/Cholla-Italic.otf    fonts/opentype/Cholla
+fonts/Cholla/Cholla-Regular.otf   fonts/opentype/Cholla
+
+examples/Makefile
+examples/minimal.tex
+
+install/unix.sh
+install/windows.bat
+
+CHANGELOG.md
+INDEX.txt
+LICENSE.txt
+README.md

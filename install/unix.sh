@@ -1,13 +1,14 @@
-#!/bin/env sh
+#!/bin/sh
 set -euo pipefail
 
-#/ Usage:
+#/ Usage: unix.sh [OPTIONS] [OVERRIDE_TEXMF]
 #/ Description: install TPT's beamer theme on a POSIX-compliant machine
 #/ Options:
 #/   --global: Installs for all user (needs root rights)
 #/   --help: Display this help message
 usage() { grep '^#/' "$0" | cut -c4- ; exit 0 ; }
 
+#Utilities
 readonly LOG_FILE="/tmp/install-telecom-beamer.log"
 info()    { echo "[INFO]    $*" | tee -a "$LOG_FILE" >&2 ; }
 warning() { echo "[WARNING] $*" | tee -a "$LOG_FILE" >&2 ; }
@@ -21,9 +22,29 @@ check_rights()  {
   fi
 }
 
-TEXMFLOCAL="$HOME/texmf"
-PACKAGE="$TEXMFLOCAL/tex/latex/beamerx/"
-FONTS="$TEXMFLOCAL/fonts/truetype/"
+#Parsing options
+while [ "$#" -gt 0 ] && [ "$1" != "" ]; do
+    PARAM=$(echo "$1" | awk -F= '{print $1}')
+    VALUE=$(echo "$1" | awk -F= '{print $2}')
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        --global)
+            TEXMF=${VALUE:-$(kpsewhich -var-value TEXMFLOCAL)}
+            check_rights "write to $TEXMF"
+            ;;
+        *)
+            echo "ERROR: unknown parameter \"$PARAM\""
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+TEXMF=${TEXMF:-$(kpsewhich --var-value TEXMFHOME)}
 PERMS="Dg+s,ug+w,o-w,+X,+r"
 
 ensure_tree_exists() {
@@ -38,7 +59,7 @@ install_in_tree() {
 }
 
 update_database() {
-  info "Updating database…"
+  info "Updating database..."
   texhash || mktexlsr || warning "Couldn't update database."
 }
 
@@ -56,10 +77,6 @@ cleanup() {
   esac
 }
 trap cleanup EXIT
-
-#Parsing options
-expr "$*" : ".*--help" > /dev/null && usage
-expr "$*" : ".*--global" > /dev/null && TEXMFLOCAL="$(kpsewhich -var-value TEXMFLOCAL)" && check_rights "access $TEXMFLOCAL"
 
 #Install process
 ensure_tree_exists
